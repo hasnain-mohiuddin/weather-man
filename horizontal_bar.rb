@@ -12,18 +12,20 @@ class HorizontalBar
   end
 
   def mapping_each_day
-
     puts "#{Month.number_to_month(@month)} #{@year}"
     @rows.each do |temp|
       _, _, day = temp[0].split('-')
-      print_message_sep(temp[1], temp[3], day) if temp[1] != ''
+      temp[1] != '' && print_message_sep(temp[1], temp[3], day)
     end
+    same_line_mapping
+  end
 
+  def same_line_mapping
     puts
     puts "#{Month.number_to_month(@month)} #{@year}"
     @rows.each do |temp|
       _, _, day = temp[0].split('-')
-      print_message(temp[1], temp[3], day) if temp[1] != ''
+      temp[1] != '' && print_message(temp[1], temp[3], day)
     end
   end
 
