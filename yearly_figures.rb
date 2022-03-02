@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-require_relative 'month'
+require 'date'
+require_relative 'calculations'
 
 class YearlyFigures
-  include Month
+  include Calculations
   def initialize(rows)
     @rows = rows
     @max_temp = '0'
@@ -19,44 +20,23 @@ class YearlyFigures
   end
 
   def highest_temp
-    @rows.each do |col|
-      col.each do |temp|
-        if temp[1] != '' && (@max_temp < temp[1])
-          @max_temp = temp[1]
-          @date = temp[0]
-        end
-      end
-    end
+    @max_temp, @date = Calculations.highest_temp(@rows)
     message_print('Highest', @max_temp, 'C')
   end
 
   def lowest_temp
-    @rows.each do |col|
-      col.each do |temp|
-        if temp[3] != '' && (@min_temp > temp[3])
-          @min_temp = temp[3]
-          @date = temp[0]
-        end
-      end
-    end
+    @min_temp, @date = Calculations.lowest_temp(@rows)
     message_print('Lowest', @min_temp, 'C')
   end
 
   def highest_humidity
-    @rows.each do |col|
-      col.each do |temp|
-        if temp[4] != '' && (@highest_humidity < temp[4])
-          @highest_humidity = temp[4]
-          @date = temp[0]
-        end
-      end
-    end
+    @highest_humidity, @date = Calculations.highest_humidity(@rows)
     message_print('Humid:', @highest_humidity, '%')
   end
 
   def message_print(text, value, sign)
     _, month, date = @date.split('-')
-    month = Month.number_to_month(month)
+    month = Date::MONTHNAMES[month.to_i]
     puts "#{text} #{value}#{sign} on #{month} #{date}"
   end
 end
