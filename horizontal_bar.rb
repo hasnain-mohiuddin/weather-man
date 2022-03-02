@@ -29,6 +29,6 @@ class HorizontalBar
   end
 
   def print_year
-    "#{Date::MONTHNAMES[@month.to_i]} #{@year}"
+    "#{@month} #{@year}"
   end
 end
