@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require_relative 'month'
+require 'date'
 require_relative 'monthly_figures'
 require_relative 'yearly_figures'
 require_relative 'horizontal_bar'
+require_relative 'file_reader'
 
 class FileHandling
-  include Month
-
+  include FileReader
   def initialize(args)
     @rows = []
     @rows_year = []
@@ -23,7 +23,6 @@ class FileHandling
   def map_to_array
     @op, @year_month, @path = @args
     @year, @month_num = @year_month.split('/')
-    select_case
   end
 
   def select_case
@@ -33,37 +32,28 @@ class FileHandling
       yearly = YearlyFigures.new(@rows_year)
       yearly.call_to_all
     when '-a'
-      reading_month_data
+      @rows = reading_month_data
+      return if @rows.nil?
+
       monthly = MonthlyFigures.new(@rows)
       monthly.call_to_all
     when '-c'
-      reading_month_data
+      @rows = reading_month_data
+      return if @rows.nil?
+
       bar = HorizontalBar.new(@rows, @year, @month)
-      bar.mapping_each_day
+      bar.diff_line_mapping
+      bar.same_line_mapping
     end
   end
 
   def reading_month_data(month = '')
-    @month = if month == ''
-               Month.number_to_month(@month_num)[0..2]
-             else
-               Month.number_to_month(month)[0..2]
-             end
+    @month = Date::MONTHNAMES[month.empty? ? @month_num.to_i : month.to_i][0..2]
     @rows = []
-    begin
-      file = File.open(
-        "#{@path}/#{@path}_#{@year}_#{@month}.txt",
-        'r'
-      )
+    file = FileReader.read_file("#{@path}/#{@path}_#{@year}_#{@month}.txt")
+    return if file.nil?
 
-      file.each do |line|
-        @rows << line.split(',').values_at(*0..3, *7..9)
-      end
-      @rows.shift
-    rescue StandardError
-      puts 'File Not Found'
-    end
-    @rows
+    file.map { |line| line.split(',').values_at(*0..3, *7..9) }.drop(1)
   end
 
   def reading_yearly_data
